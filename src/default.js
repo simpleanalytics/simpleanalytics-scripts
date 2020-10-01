@@ -2,6 +2,40 @@
 
 (function (window, overwriteOptions, baseUrl, apiUrlPrefix, version, saGlobal) {
   if (!window) return;
+
+  function stringifyUUID(arr) {
+    // Note: Be careful editing this code!  It's been tuned for performance
+    // and works in ways you may not expect. See https://github.com/uuidjs/uuid/pull/434
+    var byteToHex = [];
+
+    for (var i = 0; i < 256; ++i) {
+      byteToHex.push((i + 0x100).toString(16).substr(1));
+    }
+
+    return (
+      byteToHex[arr[0]] +
+      byteToHex[arr[1]] +
+      byteToHex[arr[2]] +
+      byteToHex[arr[3]] +
+      "-" +
+      byteToHex[arr[4]] +
+      byteToHex[arr[5]] +
+      "-" +
+      byteToHex[arr[6]] +
+      byteToHex[arr[7]] +
+      "-" +
+      byteToHex[arr[8]] +
+      byteToHex[arr[9]] +
+      "-" +
+      byteToHex[arr[10]] +
+      byteToHex[arr[11]] +
+      byteToHex[arr[12]] +
+      byteToHex[arr[13]] +
+      byteToHex[arr[14]] +
+      byteToHex[arr[15]]
+    ).toLowerCase();
+  }
+
   try {
     /////////////////////
     // PREDEFINED VARIABLES FOR BETTER MINIFICATION
@@ -81,19 +115,17 @@
     var now = Date.now;
 
     var uuid = function () {
-      var cryptoObject = window.crypto || window.msCrypto;
-      var emptyUUID = [1e7] + -1e3 + -4e3 + -8e3 + -1e11;
-      var uuidRegex = /[018]/g;
-
       try {
-        return emptyUUID.replace(uuidRegex, function (c) {
-          return (
-            c ^
-            (cryptoObject.getRandomValues(new Uint8Array(1))[0] &
-              (15 >> (c / 4)))
-          ).toString(16);
-        });
+        var cryptoObject = window.crypto || window.msCrypto;
+        var rnds = cryptoObject.getRandomValues(new Uint8Array(16));
+        // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`
+        rnds[6] = (rnds[6] & 0x0f) | 0x40;
+        rnds[8] = (rnds[8] & 0x3f) | 0x80;
+        return stringifyUUID(rnds);
       } catch (error) {
+        payload.uuidfallback = error.message;
+        var emptyUUID = [1e7] + -1e3 + -4e3 + -8e3 + -1e11;
+        var uuidRegex = /[018]/g;
         return emptyUUID.replace(uuidRegex, function (c) {
           var r = (Math.random() * 16) | 0,
             v = c < 2 ? r : (r & 0x3) | 0x8;
@@ -101,6 +133,28 @@
         });
       }
     };
+
+    // var uuid = function () {
+    //   var cryptoObject = window.crypto || window.msCrypto;
+    //   var emptyUUID = [1e7] + -1e3 + -4e3 + -8e3 + -1e11;
+    //   var uuidRegex = /[018]/g;
+
+    //   try {
+    //     return emptyUUID.replace(uuidRegex, function (c) {
+    //       return (
+    //         c ^
+    //         (cryptoObject.getRandomValues(new Uint8Array(1))[0] &
+    //           (15 >> (c / 4)))
+    //       ).toString(16);
+    //     });
+    //   } catch (error) {
+    //     return emptyUUID.replace(uuidRegex, function (c) {
+    //       var r = (Math.random() * 16) | 0,
+    //         v = c < 2 ? r : (r & 0x3) | 0x8;
+    //       return v.toString(16);
+    //     });
+    //   }
+    // };
 
     var assign = function () {
       var to = {};
