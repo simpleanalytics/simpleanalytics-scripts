@@ -53,6 +53,7 @@ const DEFAULTS = {
   testing: IS_TESTING,
   minify: true,
   sri: true,
+  dev: false,
   duration: true,
   events: true,
   hash: true,
@@ -116,6 +117,20 @@ const files = [
   {
     type: "js",
     input: `${__dirname}/src/default.js`,
+    output: `latest.dev.js`,
+    variables: {
+      ...DEFAULTS,
+      version: VERSION,
+      minify: false,
+      dev: true,
+      scriptName: `cdn_latest_dev_${VERSION}`,
+      baseUrl: "simpleanalyticscdn.com",
+      apiUrlPrefix: "queue.",
+    },
+  },
+  {
+    type: "js",
+    input: `${__dirname}/src/default.js`,
     output: `cloudflare.js`,
     variables: {
       ...DEFAULTS,
@@ -163,6 +178,19 @@ const files = [
       ...DEFAULTS,
       version: VERSION,
       scriptName: `custom_latest_${VERSION}`,
+      baseUrl: "{{nginxHost}}",
+    },
+  },
+  {
+    type: "js",
+    input: `${__dirname}/src/default.js`,
+    output: `custom/latest.dev.js`,
+    variables: {
+      ...DEFAULTS,
+      dev: true,
+      minify: false,
+      version: VERSION,
+      scriptName: `custom_latest_dev_${VERSION}`,
       baseUrl: "{{nginxHost}}",
     },
   },

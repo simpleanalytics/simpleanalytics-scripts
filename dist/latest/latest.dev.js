@@ -1,3 +1,4 @@
+/* Simple Analytics - Privacy friendly analytics (docs.simpleanalytics.com/script; 2021-04-24; 1ad9; v7) */
 /* eslint-env browser */
 
 (function (window, overwriteOptions, baseUrl, apiUrlPrefix, version, saGlobal) {
@@ -17,9 +18,7 @@
     // version stays small.
     var https = "https:";
     var pageviewsText = "pageview";
-    /** if errorhandling **/
     var errorText = "error";
-    /** endif **/
     var slash = "/";
     var protocol = https + "//";
     var con = window.console;
@@ -54,15 +53,12 @@
     var platformVersionText = "platformVersion";
     var isBotAgent =
       /(bot|spider|crawl)/i.test(userAgent) && !/(cubot)/i.test(userAgent);
-    /** if screen **/
     var screen = window.screen;
-    /** endif **/
 
     /////////////////////
     // PAYLOAD FOR BOTH PAGE VIEWS AND EVENTS
     //
 
-    /** if botdetection **/
     var bot =
       nav.webdriver ||
       window.__nightmare ||
@@ -71,9 +67,6 @@
       "phantom" in window ||
       isBotAgent;
 
-    /** else **/
-    var bot = isBotAgent;
-    /** endif **/
 
     var payload = {
       version: version,
@@ -81,13 +74,9 @@
     };
     if (bot) payload.bot = true;
 
-    /** if dev **/
     payload.dev = true;
-    /** endif **/
 
-    /** if sri **/
     payload.sri = true;
-    /** endif **/
 
     // Use User-Agent Client Hints for better privacy
     // https://web.dev/user-agent-client-hints/
@@ -170,7 +159,6 @@
       if (match && match[0]) return match[0];
     };
 
-    /** if ignorepages **/
     // Ignore pages specified in data-ignore-pages
     var shouldIgnore = function (path) {
       for (var i in ignorePages) {
@@ -193,7 +181,6 @@
       }
       return false;
     };
-    /** endif **/
 
     /////////////////////
     // SEND DATA VIA OUR PIXEL
@@ -204,12 +191,10 @@
       data = assign(payload, data);
 
       var image = new Image();
-      /** if events **/
       if (callback) {
         image.onerror = callback;
         image.onload = callback;
       }
-      /** endif **/
       image.src =
         fullApiUrl +
         "/simple.gif?" +
@@ -229,7 +214,6 @@
         Date.now();
     };
 
-    /** if errorhandling **/
     /////////////////////
     // ERROR FUNCTIONS
     //
@@ -256,25 +240,18 @@
       },
       false
     );
-    /** endif **/
 
     /////////////////////
     // INITIALIZE VALUES
     //
 
-    /** if spa **/
     var pushState = "pushState";
     var dis = window.dispatchEvent;
-    /** endif **/
 
-    /** if duration **/
     var duration = "duration";
     var start = now();
-    /** endif **/
 
-    /** if scroll **/
     var scrolled = 0;
-    /** endif **/
 
     // This code could error on (incomplete) implementations, that's why we use try...catch
     var timezone;
@@ -297,14 +274,12 @@
     // Script mode, this can be hash mode for example
     var mode = overwriteOptions.mode || attr(scriptElement, "mode");
 
-    /** if ignorednt **/
     // Should we record Do Not Track visits?
     var collectDnt = isBoolean(overwriteOptions.collectDnt)
       ? overwriteOptions.collectDnt
       : attr(scriptElement, "ignore-dnt") == trueText ||
         attr(scriptElement, "skip-dnt") == trueText ||
         attr(scriptElement, "collect-dnt") == trueText;
-    /** endif **/
 
     // Customers can overwrite their hostname, here we check for that
     var definedHostname =
@@ -312,21 +287,16 @@
       attr(scriptElement, "hostname") ||
       locationHostname;
 
-    /** if (or spa hash) **/
     // Some customers want to collect page views manually
     var autoCollect = !(
       attr(scriptElement, "auto-collect") == "false" ||
       overwriteOptions.autoCollect === false
     );
-    /** endif **/
 
-    /** if events **/
     // Event function name
     var functionName =
       overwriteOptions.saGlobal || attr(scriptElement, "sa-global") || saGlobal;
-    /** endif **/
 
-    /** if ignorepages **/
     // Customers can ignore certain pages
     var ignorePagesRaw =
       overwriteOptions.ignorePages || attr(scriptElement, "ignore-pages");
@@ -337,7 +307,6 @@
       : isString(ignorePagesRaw) && ignorePagesRaw.length
       ? ignorePagesRaw.split(/, ?/)
       : [];
-    /** endif **/
 
     /////////////////////
     // ADD HOSTNAME TO PAYLOAD
@@ -349,35 +318,15 @@
     // ADD WARNINGS
     //
 
-    /** if warnings **/
     // Warn when no document.doctype is defined (this breaks some documentElement dimensions)
     if (!doc.doctype) warn("Add DOCTYPE html for more accurate dimensions");
-    /** endif **/
 
     // When a customer overwrites the hostname, we need to know what the original
     // hostname was to hide that domain from referrer traffic
     if (definedHostname !== locationHostname)
       payload.hostname_original = locationHostname;
 
-    /** unless dev **/
-    // Don't track when Do Not Track is set to true
-    /** if ignorednt **/
-    if (!collectDnt && doNotTrack in nav && nav[doNotTrack] == "1")
-      return warn(notSending + "when " + doNotTrack + " is enabled");
-    /** else **/
-    if (doNotTrack in nav && nav[doNotTrack] == "1")
-      return warn(notSending + "when " + doNotTrack + " is enabled");
-    /** endif **/
-    /** endunless **/
 
-    /** unless (or testing dev) **/
-    // Don't track when localhost or when it's an IP address
-    if (
-      locationHostname.indexOf(".") == -1 ||
-      /^[0-9]+$/.test(locationHostname.replace(/\./g, ""))
-    )
-      return warn(notSending + "from " + locationHostname);
-    /** endunless **/
 
     /////////////////////
     // SETUP INITIAL VARIABLES
@@ -417,15 +366,11 @@
     var sendOnLeave = function (id, push) {
       var append = { type: "append", original_id: push ? id : lastPageId };
 
-      /** if duration **/
       append[duration] = Math.round((now() - start - msHidden) / thousand);
       msHidden = 0;
       start = now();
-      /** endif **/
 
-      /** if scroll **/
       append.scrolled = Math.max(0, scrolled, position());
-      /** endif **/
 
       if (push || !(sendBeaconText in nav)) {
         sendData(append);
@@ -437,7 +382,6 @@
       }
     };
 
-    /** if duration **/
     var hiddenStart;
     window.addEventListener(
       "visibilitychange",
@@ -449,11 +393,9 @@
       },
       false
     );
-    /** endif **/
 
     addEventListenerFunc(pagehide, sendOnLeave, false);
 
-    /** if scroll **/
     var body = doc.body || {};
     var position = function () {
       try {
@@ -488,7 +430,6 @@
         false
       );
     });
-    /** endif **/
 
     /////////////////////
     // ACTUAL PAGE VIEW LOGIC
@@ -505,18 +446,14 @@
         // Do nothing
       }
 
-      /** if ignorepages **/
       // Ignore pages specified in data-ignore-pages
       if (shouldIgnore(path)) {
         warn(notSending + "because " + path + " is ignored");
         return;
       }
-      /** endif **/
 
-      /** if hash **/
       // Add hash to path when script is put in to hash mode
       if (mode == "hash" && loc.hash) path += loc.hash.split("?")[0];
-      /** endif **/
 
       return path;
     };
@@ -557,7 +494,6 @@
 
       lastSendPath = path;
 
-      /** if screen **/
       var data = {
         path: path,
         viewport_width:
@@ -569,20 +505,13 @@
             window.innerHeight || 0
           ) || null,
       };
-      /** else **/
-      var data = {
-        path: path,
-      };
-      /** endif **/
 
       if (nav[language]) data[language] = nav[language];
 
-      /** if screen **/
       if (screen) {
         data.screen_width = screen.width;
         data.screen_height = screen.height;
       }
-      /** endif **/
 
       // If a user does refresh we need to delete the referrer because otherwise it count double
       var perf = window.performance;
@@ -608,10 +537,8 @@
         ? doc.referrer.split(slash)[2] == locationHostname
         : false;
 
-      /** if uniques **/
       // We set unique variable based on pushstate or back navigation, if no match we check the referrer
       data.unique = isPushState || userNavigated ? false : !sameSite;
-      /** endif **/
 
       page = data;
 
@@ -643,7 +570,6 @@
       }
     };
 
-    /** if spa **/
     /////////////////////
     // AUTOMATED PAGE VIEW COLLECTION
     //
@@ -691,9 +617,7 @@
         false
       );
     }
-    /** endif **/
 
-    /** if hash **/
     // When in hash mode, we record a pageview based on the onhashchange function
     if (autoCollect && mode == "hash" && "onhashchange" in window) {
       addEventListenerFunc(
@@ -704,19 +628,13 @@
         false
       );
     }
-    /** endif **/
 
-    /** if (or spa hash) **/
     if (autoCollect) pageview();
     else
       window.sa_pageview = function (path) {
         pageview(0, path);
       };
-    /** else **/
-    pageview();
-    /** endif **/
 
-    /** if events **/
     /////////////////////
     // EVENTS
     //
@@ -782,19 +700,14 @@
         ? sendEvent.apply(null, queue[event])
         : sendEvent(queue[event]);
     }
-    /** endif **/
   } catch (e) {
-    /** if errorhandling **/
     sendError(e);
-    /** else **/
-    warn(e);
-    /** endif **/
   }
 })(
   window,
-  "{{overwriteOptions}}",
-  "{{baseUrl}}",
-  "{{apiUrlPrefix}}",
-  "{{scriptName}}",
-  "{{saGlobal}}"
+  {},
+  "simpleanalyticscdn.com",
+  "queue.",
+  "cdn_latest_dev_7",
+  "sa_event"
 );
