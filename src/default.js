@@ -359,7 +359,12 @@
     if (definedHostname !== locationHostname)
       payload.hostname_original = locationHostname;
 
-    /** unless dev **/
+    /** if dev **/
+    warn(
+      "Running in development mode. Remove .dev from script file name on production."
+    );
+    /** else **/
+
     // Don't track when Do Not Track is set to true
     /** if ignorednt **/
     if (!collectDnt && doNotTrack in nav && nav[doNotTrack] == "1")
@@ -368,11 +373,8 @@
     if (doNotTrack in nav && nav[doNotTrack] == "1")
       return warn(notSending + "when " + doNotTrack + " is enabled");
     /** endif **/
-    /** else **/
-    warn(
-      "Running in development mode. Remove .dev from script file name on production."
-    );
-    /** endunless **/
+
+    /** endif **/
 
     /** unless (or testing dev) **/
     // Don't track when localhost or when it's an IP address
