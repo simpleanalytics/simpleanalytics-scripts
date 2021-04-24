@@ -1,4 +1,4 @@
-/* Simple Analytics - Privacy friendly analytics (docs.simpleanalytics.com/script; 2021-04-24; 1ad9; v7) */
+/* Simple Analytics - Privacy friendly analytics (docs.simpleanalytics.com/script; 2021-04-24; e751; v7) */
 /* eslint-env browser */
 
 (function (window, overwriteOptions, baseUrl, apiUrlPrefix, version, saGlobal) {
@@ -326,6 +326,9 @@
     if (definedHostname !== locationHostname)
       payload.hostname_original = locationHostname;
 
+    warn(
+      "Running in development mode. Remove .dev from script file name on production."
+    );
 
 
     /////////////////////

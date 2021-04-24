@@ -368,6 +368,10 @@
     if (doNotTrack in nav && nav[doNotTrack] == "1")
       return warn(notSending + "when " + doNotTrack + " is enabled");
     /** endif **/
+    /** else **/
+    warn(
+      "Running in development mode. Remove .dev from script file name on production."
+    );
     /** endunless **/
 
     /** unless (or testing dev) **/
